@@ -63,6 +63,6 @@ round(energy, digits=2)
 
 
 v <- c(2,5,7,8,9)
-f_values = lapply(v, function(x) {x^3 + x^2 + x})
-f_values_mean = mean(unlist(f_values))
+f_values <- lapply(v, function(x) {x^3 + x^2 + x})
+f_values_mean <- mean(unlist(f_values))
 f_values_mean
