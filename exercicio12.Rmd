@@ -1,0 +1,108 @@
+---
+title: "exercicio12"
+author: "Lucas Burle"
+date: "2023-12-14"
+output: html_document
+---
+
+# Exercício 12 {.tabset}
+## Dependências
+```{r dependencias, echo=TRUE, results='hide'}
+
+```
+## Questão 1
+```{r questao1-dados, echo=TRUE}
+MRT_1F <-c(517.1468515630205, 85.13094142168089, 30.333207896694553, 12.694776264558937, 3.3041601673945418, 1.1823111717498882, 1.1892293502386786)
+
+MRT_3F <-c(156.68929936163462, 11.540837783562276, 0.4512835621696538, 0.4509797929766453, 0.4502068233039181, 0.4496185276300172, 0.4543157082191288)
+
+MRT_5F <-c(83.90319666471157, 0.3068151086494968, 0.30522314133037304, 0.3072588968084928, 0.30655265997285697, 0.3055812715727718, 0.3053297166713006)
+
+MRT_10F <-c(29.55430642951759, 0.19832832665772515, 0.1971923924717474, 0.19796648905716516, 0.19615594370806338, 0.2034569237883263, 0.19617420889447737)
+
+MRT_15F <-c(11.317736530583566, 0.167364215666193, 0.16172168266811013, 0.16701085329580515, 0.1598052657153692, 0.1645934043532696, 0.16216563797118075)
+
+MRT_sem_F <-c(11.93430909937736, 0.6095414637034009, 0.6060645101029295, 0.612167181646899, 0.6146761002685637, 0.6096747087200697, 0.6125810476877268)
+
+clock <- c(0.1, 0.5, 1, 1.5, 2, 2.5, 3)
+```
+``` {r questao1-grafico1, echo=TRUE}
+xlim <- max(clock)
+ylim <- max(c(MRT_1F, MRT_3F, MRT_5F, MRT_10F, MRT_15F, MRT_sem_F))
+
+plot(clock, MRT_1F, type="o", col="black", pch=4, 
+     xlim=c(0, xlim), ylim=c(0, ylim),
+     ylab="Response Time (sec.)",
+     xlab="Time between Things requests (seconds)")
+lines(clock, MRT_3F, type="o", col="yellow", pch=11)
+lines(clock, MRT_5F, type="o", col="red", pch=1)
+lines(clock, MRT_10F, type="o", col="blue", pch=2)
+lines(clock, MRT_15F, type="o", col="purple", pch=5)
+lines(clock, MRT_sem_F, type="o", col="green", pch=4)
+
+legend("topright", pch=c(4, 11, 1, 2, 5, 4),
+       col=c("black", "yellow", "red", "blue", "purple", "green"),
+       legend=c("1 Fog", "3 Fogs", "5 Fogs", "10 Fogs", "15 Fogs", "w/o Fog"))
+
+```
+```{r questao1-grafico2, echo=TRUE, fig.width=10, fig.height=10}
+layout(matrix(c(1, 2,
+                3, 4,
+                5, 0), nrow=3, byrow=TRUE))
+
+
+barplot(rbind(MRT_sem_F, MRT_1F), 
+        names.arg=clock,
+        log="y", 
+        col=c("#E6E6E6", "#666666"),
+        beside=T, 
+        xlab="Time between Things requests",
+        ylab="Response Time (s)")
+legend("topright", pch=c(15, 15), 
+       col=c("#E6E6E6", "#666666"),
+       legend=c("w/o Fogs", "1 Fog"))
+
+barplot(rbind(MRT_sem_F, MRT_3F), 
+        names.arg=clock,
+        log="y", 
+        col=c("#E6E6E6", "#666666"),
+        beside=T, 
+        xlab="Time between Things requests",
+        ylab="Response Time (s)")
+legend("topright", pch=c(15, 15), 
+       col=c("#E6E6E6", "#666666"),
+       legend=c("w/o Fogs", "3 Fogs"))
+
+barplot(rbind(MRT_sem_F, MRT_5F), 
+        names.arg=clock,
+        log="y", 
+        col=c("#E6E6E6", "#666666"),
+        beside=T, 
+        xlab="Time between Things requests",
+        ylab="Response Time (s)")
+legend("topright", pch=c(15, 15), 
+       col=c("#E6E6E6", "#666666"),
+       legend=c("w/o Fogs", "5 Fogs"))
+
+barplot(rbind(MRT_sem_F, MRT_10F), 
+        names.arg=clock,
+        log="y", 
+        col=c("#E6E6E6", "#666666"),
+        beside=T, 
+        xlab="Time between Things requests",
+        ylab="Response Time (s)")
+legend("topright", pch=c(15, 15), 
+       col=c("#E6E6E6", "#666666"),
+       legend=c("w/o Fogs", "10 Fogs"))
+
+barplot(rbind(MRT_sem_F, MRT_15F), 
+        names.arg=clock,
+        log="y", 
+        col=c("#E6E6E6", "#666666"),
+        beside=T, 
+        xlab="Time between Things requests",
+        ylab="Response Time (s)")
+legend("topright", pch=c(15, 15), 
+       col=c("#E6E6E6", "#666666"),
+       legend=c("w/o Fogs", "15 Fogs"))
+```
