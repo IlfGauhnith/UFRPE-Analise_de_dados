@@ -8,8 +8,17 @@ output: html_document
 # Exercício 12 {.tabset}
 ## Dependências
 ```{r dependencias, echo=TRUE, results='hide'}
+install.packages("dplyr")
+library("dplyr")
 
+install.packages("tidyr")
+library("tidyr")
+
+install.packages("plotly")
+library("plotly")
 ```
+
+
 ## Questão 1
 ```{r questao1-dados, echo=TRUE}
 MRT_1F <-c(517.1468515630205, 85.13094142168089, 30.333207896694553, 12.694776264558937, 3.3041601673945418, 1.1823111717498882, 1.1892293502386786)
@@ -106,3 +115,242 @@ legend("topright", pch=c(15, 15),
        col=c("#E6E6E6", "#666666"),
        legend=c("w/o Fogs", "15 Fogs"))
 ```
+
+
+
+## Questão 2
+```{r questao2-dados, echo=TRUE}
+good <- c(53.8, 33.9, 2.6, 0)
+very_good <- c(43.6, 54.2, 60.5, 21.4)
+excellent <- c(2.6, 11.9, 36.8, 78.6)
+
+bardata <- rbind(good, very_good, excellent)
+  
+labels <- c("$10-19", "$20-29", "$30-39", "$40-49")
+```
+```{r questao2-grafico, echo=TRUE, fig.width=10, fig.height=10}
+
+barplot(bardata,
+        names.arg=labels,
+        main="Meal",
+        ylab="Quality Rating",
+        xlab="Meal Price",
+        xlim=c(0, 8),
+        space=0.5,
+        col=rainbow(3))
+
+legend("topright",
+       col=rainbow(3),
+       lwd=10,
+       legend=c("Good", "Very Good", "Excellent"))
+```
+
+
+
+## Questão 3
+```{r questao3, echo=TRUE}
+
+temp <- airquality %>%
+  filter((Month == 5)) %>%
+  select(Temp)
+
+temp <- (temp - 32) / 1.8
+
+hist(temp$Temp,
+     main="Temperatura em Maio",
+     xlab="Temperatura",
+     ylab="Frequência",
+     probability = T,
+     col=c(2:9))
+
+lines(density(temp$Temp))
+```
+
+
+## Questão 4
+```{r questao4, echo=TRUE}
+sales <- read.table("https://training-course-material.com/images/8/8f/Sales.txt",header=TRUE)
+
+pie(sales$SALES, 
+    labels = paste(round((sales$SALES/sum(sales$SALES))*100, 2), rep("%", length(sales$COUNTRY)), sep = ""),
+    col=rainbow(length(sales$COUNTRY)),
+    main="Sales By Country")
+
+legend("topright",
+       fill = rainbow(length(sales$COUNTRY)),
+       legend=sales$COUNTRY)
+```
+
+
+
+## Questão 5
+```{r questao5, echo=TRUE}
+boxplot(InsectSprays$count ~ InsectSprays$spray,
+        main="Insect Sprays",
+        ylab="Insect Count",
+        xlab="Spray Category",
+        col="yellow",
+        )
+```
+
+## Questão 6
+```{r questao6-dados, echo=TRUE}
+monitoring01 <- read.csv("monitoringCloudData/monitoringCloudData_0.1.csv")
+monitoring05 <- read.csv("monitoringCloudData/monitoringCloudData_0.5.csv")
+monitoring1 <- read.csv("monitoringCloudData/monitoringCloudData_1.csv")
+monitoringnone <- read.csv("monitoringCloudData/monitoringCloudData_NONE.csv")
+
+
+# Convertendo currentTime para DataTime
+monitoring01$currentTime <- as.POSIXct(monitoring01$currentTime, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+monitoring05$currentTime <- as.POSIXct(monitoring05$currentTime, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+monitoring1$currentTime <- as.POSIXct(monitoring1$currentTime, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+monitoringnone$currentTime <- as.POSIXct(monitoringnone$currentTime, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+
+# Ordenando de forma descendente por currentTime
+monitoring01 <- monitoring01[order(monitoring01$currentTime), ]
+monitoring05 <- monitoring05[order(monitoring05$currentTime), ]
+monitoring1 <- monitoring1[order(monitoring1$currentTime), ]
+monitoringnone <- monitoringnone[order(monitoringnone$currentTime), ]
+
+# Com currentTime ordenado é possível converter a coluna para valores unitários de hora
+# realizando a operação (hora_atual - primeira_hora)
+monitoring01$currentTime <- difftime(monitoring01$currentTime, monitoring01[1,"currentTime"], units = "hours")
+monitoring05$currentTime <- difftime(monitoring05$currentTime, monitoring05[1,"currentTime"], units = "hours")
+monitoring1$currentTime <- difftime(monitoring1$currentTime, monitoring1[1,"currentTime"], units = "hours")
+monitoringnone$currentTime <- difftime(monitoringnone$currentTime, monitoringnone[1,"currentTime"], units = "hours")
+
+# Separando usedMemory em duas colunas usedMemory e usedMemoryUnit. 
+# usedMemory contêm a quantidade de memória utilizada.
+# usedMemoryUnit contém a unidade da quantidade de memória utilizada. Por exemplo "GB", "MB", "TB".
+monitoring01 <- monitoring01 %>% extract(usedMemory, into=c("usedMemory", "usedMemoryUnit"), regex="([[:digit:].]+)(PB|TB|GB|MB|KB)")
+monitoring05 <- monitoring05 %>% extract(usedMemory, into=c("usedMemory", "usedMemoryUnit"), regex="([[:digit:].]+)(PB|TB|GB|MB|KB)")
+monitoring1 <- monitoring1 %>% extract(usedMemory, into=c("usedMemory", "usedMemoryUnit"), regex="([[:digit:].]+)(PB|TB|GB|MB|KB)")
+monitoringnone <- monitoringnone %>% extract(usedMemory, into=c("usedMemory", "usedMemoryUnit"), regex="([[:digit:].]+)(PB|TB|GB|MB|KB)")
+
+convert_to_mb <- function(df) {
+  unit <- df[6]
+  value <- as.numeric(df[5])
+  
+  switch(unit,
+         "MB" = value,
+         "GB" = value * 1024,
+         "TB" = value * 1000000,
+         stop("Unknown unit: ", unit))
+}
+
+plot(monitoring01$currentTime, apply(monitoring01, 1, convert_to_mb), type="l")
+```
+
+```{r questao6-plot, echo=TRUE, fig.width=10, fig.height=10}
+layout(matrix(c(1, 2,
+                3, 4), nrow=2, byrow=TRUE))
+
+plot(monitoringnone$currentTime, apply(monitoringnone, 1, convert_to_mb), 
+     type="l",
+     xlab="Time (hour)",
+     ylab="Used Memory (MB)",
+     main="Memory Analysis (None Workload)")
+
+plot(monitoring01$currentTime, apply(monitoring01, 1, convert_to_mb), type="l",
+     xlab="Time (hour)",
+     ylab="Used Memory (MB)",
+     main="Memory Analysis (Workload of 0.1)")
+
+plot(monitoring05$currentTime, apply(monitoring05, 1, convert_to_mb), type="l",
+     xlab="Time (hour)",
+     ylab="Used Memory (MB)",
+     main="Memory Analysis (Workload of 0.5)")
+
+plot(monitoring1$currentTime, apply(monitoring1, 1, convert_to_mb), type="l",
+     xlab="Time (hour)",
+     ylab="Used Memory (MB)",
+     main="Memory Analysis (Workload of 1.0)")
+
+```
+
+
+
+## Questão 7
+```{r questao7, echo=TRUE}
+df <- read.csv("netflix_titles.csv", na.strings = "")
+
+top_10 <- df %>% 
+  filter(!is.na(country)) %>%
+  count(country, sort=T) %>%
+  top_n(10)
+
+fig <- plot_ly(top_10, labels=top_10$country, values=top_10$n, type="pie")
+fig
+```
+
+## Questão 8
+```{r questao8, echo=TRUE}
+df <- read.csv("netflix_titles.csv", na.strings = "")
+
+top_10 <- df %>% 
+  filter(!is.na(country)) %>%
+  count(country, sort=T) %>%
+  top_n(10)
+fig <- plot_ly(type="table",
+               header = list(
+                 values = c("País", "Total de conteúdos"),
+                 align = c("center", "center"),
+                 fill = list(color = c("grey", "grey")),
+                 font = list(color = "white")
+               ),
+               cells =list(
+                 values = rbind(top_10$country, top_10$n),
+                 align = c("center", "center")
+               ))
+fig
+```
+
+## Questão 9
+```{r questao9, echo=TRUE}
+df <- read.csv("netflix_titles.csv", na.strings = "")
+
+df$type <- factor(df$type)
+
+movies <- df %>%
+  filter(type == "Movie") %>%
+  select(release_year) %>%
+  mutate(release_year = release_year - release_year %% 10) %>%
+  rename("decade" = "release_year") %>%
+  count(decade)
+
+tv_shows <- df %>%
+  filter(type == "TV Show") %>%
+  select(release_year) %>%
+  mutate(release_year = release_year - release_year %% 10) %>%
+  rename("decade" = "release_year") %>%
+  count(decade)
+  
+fig <- plot_ly(movies, x = movies$decade, y = movies$n, type="scatter", name="Movies", mode = "lines+markers")
+fig <- fig %>% add_trace(y = tv_shows$n, name="TV Shows", mode = "lines+markers")
+fig
+```
+
+## Questão 10
+``` {r questao10, echo=TRUE}
+df <- read.csv("netflix_titles.csv", na.strings = "")
+
+df <- df %>%
+  filter(release_year >= 2000 & release_year <= 2010) %>%
+  select(release_year, listed_in) %>%
+  separate(listed_in, c("gender"), sep = ",", remove = T, extra="drop") %>%
+  filter(gender %in% c("Dramas", "Action & Adventure", "Comedies")) %>%
+  group_by(release_year, gender) %>%
+  count()
+
+
+dramas <- df %>% filter(gender == "Dramas")
+actionAdventure <- df %>% filter(gender == "Action & Adventure")
+comedies <- df %>% filter(gender == "Comedies")
+
+fig <- plot_ly(df, x = dramas$release_year, y = dramas$n, name="Dramas", type = "bar")
+fig <- fig %>% add_trace(y = actionAdventure$n, name = "Ação e Aventura")
+fig <- fig %>% add_trace(y = comedies$n, name="Comédia")
+fig
+```
+
