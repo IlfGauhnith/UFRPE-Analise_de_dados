@@ -1,0 +1,70 @@
+---
+title: "Estudo sobre as fatalidades decorrentes do conflito entre Israel e Palestina"
+author: "Lucas Burle"
+date: "2024-02-06"
+output: html_document
+---
+```{r dependencias, echo=F, results='hide', warning=F, message=F}
+dependencies <- c("dplyr", "tidyr", "plotly", "knitr", "kableExtra")
+new.packages <- dependencies[!(dependencies %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/" )
+
+library(dplyr)
+library(tidyr)
+library(plotly)
+library(knitr)
+library(kableExtra)
+```
+# Israel x Palestina {.tabset}
+
+## Introdução {.tabset}
+### Motivação
+**Por que analisar estes dados?** A questão do conflito entre Israel e a Palestina é uma das mais complexas e profundamente enraizadas disputas geopolíticas da era moderna. Os dados referentes às fatalidades nesse contexto não apenas refletem a extensão do conflito, mas também fornecem insights cruciais para entender suas dinâmicas e impactos.  
+  
+A análise de dados relacionados às fatalidades oferece uma perspectiva objetiva e quantificável sobre a extensão do sofrimento humano e das perdas resultantes desse conflito prolongado. Cada vida perdida representa uma tragédia individual e uma família dilacerada, mas também serve como um indicador do clima de violência e instabilidade que permeia a região. Além disso, os dados podem revelar padrões e tendências ao longo do tempo, destacando períodos de escalada ou diminuição da violência e identificando áreas geográficas ou grupos demográficos particularmente afetados.
+
+Por fim, a análise de dados sobre as fatalidades no conflito israelense-palestino também desafia a comunidade internacional a assumir responsabilidade e agir de forma decisiva para resolver uma das questões mais urgentes e persistentes da política global contemporânea. Os números por si só podem não transmitir a totalidade do sofrimento humano ou a complexidade das causas subjacentes, mas são um ponto de partida crucial para promover o diálogo, a compreensão mútua e, em última análise, a justiça e a paz duradoura na região.  
+
+### Dependências
+```{r echo=F, results='asis'}
+dependencies.df <- data.frame('Descrição' = dependencies)
+kable(dependencies.df)
+```
+## Processamento dos Dados {.tabset}
+
+### Fonte
+Os dados analisados nesse estudo encontram-se no **[Kaggle](https://www.kaggle.com/datasets/willianoliveiragibin/fatalities-in-the-israeli-palestinian).**  
+
+#### Lendo o conjunto de dados
+```{r echo=T, cache=F, }
+raw <- read.csv("./data/raw/fatalities_isr_pse_conflict_2000_to_2023.csv")
+kable(raw[0:5,], "html") %>%
+  kable_styling("striped") %>%
+  column_spec(16, width_min = "100em")
+```
+#### Estrutura dos dados
+Para realizar a análise é preciso entender as colunas disponíveis e suas possíveis utilidades. 
+Identifiquei as seguintes colunas que serão interessantes para realizar a análise:  
+
+- **Data do Evento:** A data em que ocorreu o evento relacionado à fatalidade.
+- **Idade:** A idade da pessoa envolvida na fatalidade.
+- **Cidadania:** A nacionalidade ou cidadania da pessoa envolvida na fatalidade.
+- **Localidade do Evento:** O local onde o evento fatal ocorreu.
+- **Distrito da Localidade do Evento:** O distrito ou área específica dentro da localidade onde o evento fatal ocorreu.
+- **Região da Localidade do Evento:** A região geográfica ou administrativa onde o evento fatal ocorreu.
+- **Data da Morte:** A data em que ocorreu a morte da pessoa envolvida na fatalidade.
+- **Gênero:** O sexo da pessoa envolvida na fatalidade.
+- **Participou das Hostilidades:** Indica se a pessoa envolvida na fatalidade estava participando ativamente das hostilidades.
+- **Tipo da Fatalidade:** O tipo de fatalidade ocorrida, como ferimento fatal, ataque aéreo, tiroteio, entre outros.
+- **Munição:** Munição utilizada na fatalidade.
+- **Morto Por:** Entidade resposável pela fatalidade.
+
+### Limpeza
+#### Removendo colunas irrelevantes
+```{r echo=T}
+selected.columns <- c("date_of_event", "age", "citizenship", "event_location", "event_location_district", "event_location_region", "date_of_death", "gender", "took_part_in_the_hostilities", "type_of_injury", "ammunition", "killed_by")
+
+processed <- raw %>% select(all_of(selected.columns))
+kable(processed[0:5,], "html") %>%
+  kable_styling("striped")
+```
